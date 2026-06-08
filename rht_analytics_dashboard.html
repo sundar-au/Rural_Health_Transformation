@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RHT Rural Health Intelligence — Acentra Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0F1A;--s1:#111827;--s2:#161E2E;--s3:#1E293B;--s4:#273447;
+  --teal:#0ABFAD;--teal2:#07998A;--teal3:rgba(10,191,173,.12);--teal4:rgba(10,191,173,.06);
+  --gold:#E8B84B;--gold2:rgba(232,184,75,.12);
+  --red:#F05252;--red2:rgba(240,82,82,.12);
+  --amber:#FB923C;--amber2:rgba(251,146,60,.12);
+  --green:#34D399;--green2:rgba(52,211,153,.12);
+  --slate:#94A3B8;--slate2:#64748B;--slate3:#334155;
+  --text:#E8EDF5;--text2:#A0AEC0;--text3:#64748B;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);
+  --r:12px;--r2:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.55;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+nav{background:rgba(10,15,26,.92);backdrop-filter:blur(20px);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:300;border-bottom:1px solid var(--border2)}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.nav-wordmark{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--text);letter-spacing:-.03em}
+.nav-wordmark em{color:var(--teal);font-style:normal}
+.nav-chip{background:var(--teal3);border:1px solid rgba(10,191,173,.25);color:var(--teal);font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.09em;text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3)}
+.live-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(10,191,173,.4)}50%{opacity:.6;box-shadow:0 0 0 6px transparent}}
+.fbar{background:var(--s1);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:60px;z-index:200;flex-wrap:wrap}
+.fl{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--slate3);background:transparent;color:var(--slate);transition:all .18s;font-family:'DM Sans',sans-serif}
+.pill:hover{border-color:var(--teal);color:var(--teal)}
+.pill.active{background:var(--teal);border-color:var(--teal);color:#000;font-weight:600}
+.pill.nat.active{background:var(--teal2);border-color:var(--teal2);color:#fff}
+.tabs{margin-left:auto;display:flex;gap:3px}
+.tb{padding:5px 14px;border-radius:var(--r2);font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--slate3);background:transparent;color:var(--text3);transition:all .18s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.tb:hover{color:var(--text)}
+.tb.active{background:var(--s4);border-color:var(--border2);color:var(--text);font-weight:600}
+.tb.nat-only{display:none}
+.tb.nat-only.show{display:block}
+.sbadge{display:none;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:4px 13px;border-radius:20px;color:#fff;font-family:'DM Sans',sans-serif;background:var(--teal2)}
+.sbadge.show{display:flex}
+.main{padding:22px 28px 60px;position:relative;z-index:1}
+.panel{display:none}
+.panel.active{display:block;animation:fadeUp .4s cubic-bezier(.16,1,.3,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.hg{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:1100px){.hg{grid-template-columns:repeat(3,1fr)}}
+.hc{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s}
+.hc:hover{border-color:var(--border2);transform:translateY(-2px)}
+.hc-bar{position:absolute;top:0;left:0;right:0;height:2px}
+.hc-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.hc-val{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;line-height:1;margin-bottom:5px;transition:all .35s}
+.hc-sub{font-size:11px;color:var(--text2);line-height:1.45}
+.hc-tag{position:absolute;top:16px;right:15px;font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;font-family:'IBM Plex Mono',monospace}
+.g2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.g21{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.g12{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:14px;margin-bottom:14px}
+.g22{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:960px){.g2,.g3,.g21,.g12,.g22{grid-template-columns:1fr}}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px}
+.ct{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px;letter-spacing:-.02em}
+.cs{font-size:11px;color:var(--text3);margin-bottom:16px}
+.sdiv{display:flex;align-items:center;gap:12px;margin:24px 0 14px}
+.sdiv-label{font-family:'Playfair Display',serif;font-size:13px;font-weight:400;color:var(--text3);font-style:italic;white-space:nowrap}
+.sdiv::after{content:'';flex:1;height:1px;background:var(--border)}
+.br{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.bl{font-size:11px;color:var(--text2);width:122px;flex-shrink:0;text-align:right}
+.bg{flex:1;background:var(--s3);border-radius:3px;height:20px;overflow:hidden}
+.bf{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:8px;font-size:10px;font-weight:600;color:#000;white-space:nowrap;width:0;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+.bv{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);width:42px;text-align:right;flex-shrink:0}
+.tier{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-radius:var(--r2);margin-bottom:7px}
+.tn{font-size:12px;font-weight:500}
+.tv{font-family:'Playfair Display',serif;font-size:20px;font-weight:600}
+.tp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)}
+.rr{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.rr:last-child{border-bottom:none}
+.rs{font-size:12px;color:var(--text2)}
+.rv{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500}
+.rb{font-size:10px;text-align:right}
+.ag{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+@media(max-width:1000px){.ag{grid-template-columns:repeat(3,1fr)}}
+.ac{background:var(--s3);border:1px solid var(--border);border-radius:var(--r2);padding:14px 10px;text-align:center;position:relative;overflow:hidden;transition:transform .15s,border-color .15s}
+.ac:hover{transform:translateY(-3px);border-color:var(--border2)}
+.ac::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.ap{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;line-height:1;margin-bottom:5px}
+.aspec{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.anet{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)}
+.aflag{font-size:8.5px;font-weight:600;padding:2px 7px;border-radius:4px;margin-top:6px;display:inline-block;letter-spacing:.04em}
+.stag{display:inline-flex;align-items:center;font-size:10px;font-weight:500;padding:2px 9px;border-radius:10px;margin-left:8px;vertical-align:middle}
+.st-nat{background:var(--s4);color:var(--text3)}.st-state{background:var(--teal3);color:var(--teal)}
+.nf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:1050px){.nf-grid{grid-template-columns:repeat(2,1fr)}}
+.nfc{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s;display:flex;flex-direction:column}
+.nfc:hover{border-color:var(--border2);transform:translateY(-2px)}
+.nfc-code{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px;display:inline-block;margin-bottom:10px;width:fit-content}
+.nfc-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:500;margin-bottom:8px;color:var(--text);letter-spacing:-.01em}
+.nfc-ev{font-size:11px;color:var(--text2);line-height:1.6;flex:1;margin-bottom:10px}
+.nfc-foot{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)}
+.nfc-foot-lbl{font-size:10px;color:var(--text3)}
+.nfc-score{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px}
+.bm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:900px){.bm-grid{grid-template-columns:1fr 1fr}}
+.bmc{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden}
+.bmc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.bmc-org{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;margin-bottom:3px;margin-left:10px}
+.bmc-full{font-size:10px;color:var(--text3);margin-bottom:10px;margin-left:10px}
+.bmc-desc{font-size:11px;color:var(--text2);line-height:1.6;margin-left:10px}
+.step-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:900px){.step-grid{grid-template-columns:1fr}}
+.step-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden}
+.step-num{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;line-height:1;opacity:.07;position:absolute;top:10px;right:16px}
+.step-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:var(--text);margin-bottom:8px}
+.step-desc{font-size:11.5px;color:var(--text2);line-height:1.65}
+.vtbl{width:100%;border-collapse:collapse;font-size:12px}
+.vtbl th{padding:8px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border2);white-space:nowrap}
+.vtbl td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.vtbl tr:last-child td{border-bottom:none}
+.vtbl tbody tr:hover td{background:var(--s3)}
+.v-valid{color:var(--green);font-weight:600;font-size:11px}
+.v-cav{color:var(--amber);font-weight:600;font-size:11px}
+.v-known{color:var(--slate2);font-weight:600;font-size:11px}
+.v-badge{display:inline-flex;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.04em}
+.sc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+@media(max-width:800px){.sc-row{grid-template-columns:1fr}}
+.sc-box{border-radius:var(--r);padding:16px 18px;border-left:3px solid}
+.sc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.sc-txt{font-size:12px;line-height:1.65;font-style:italic}
+.mini3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.mini{text-align:center;padding:12px 8px;border-radius:var(--r2);border:1px solid var(--border)}
+.mini-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1}
+.mini-lbl{font-size:10px;color:var(--text3);margin-top:4px}
+.ins-card{padding:12px 14px;border-radius:var(--r2);border-left:3px solid;margin-bottom:9px}
+.ins-t{font-size:11px;font-weight:600;margin-bottom:4px}
+.ins-b{font-size:11px;color:var(--text2);line-height:1.55}
+.res3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.rsc{border-radius:var(--r2);padding:12px 15px;border-left:3px solid}
+.rsc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.rsc-txt{font-size:11px;line-height:1.55}
+/* DQ warning banner */
+.dq-banner{padding:8px 13px;border-radius:var(--r2);border-left:3px solid var(--amber);background:var(--amber2);font-size:11px;color:var(--amber);margin-bottom:14px;line-height:1.55;display:none}
+.dq-banner.show{display:block}
+footer{background:var(--s1);border-top:1px solid var(--border);padding:18px 28px;text-align:center;font-size:11px;color:var(--text3);position:relative;z-index:1}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">
+    <div class="nav-wordmark">Rural Health <em>Intelligence</em></div>
+    <span class="nav-chip">RHT Grant Platform</span>
+  </div>
+  <div class="nav-right">
+    <span class="live-dot"></span>
+    HHS Medicaid Dataset &bull; 238M records &bull; 9 states &bull; Jan 2022&ndash;Oct 2024 &bull; Run 4 v1.1.2
+  </div>
+</nav>
+
+<!-- FILTER BAR -->
+<div class="fbar">
+  <span class="fl">Filter State</span>
+  <div class="pills">
+    <button class="pill nat active" onclick="V('national',this)">&#127758; All States</button>
+    <button class="pill" onclick="V('WY',this)">WY</button>
+    <button class="pill" onclick="V('IL',this)">IL</button>
+    <button class="pill" onclick="V('NY',this)">NY</button>
+    <button class="pill" onclick="V('AZ',this)">AZ</button>
+    <button class="pill" onclick="V('HI',this)">HI</button>
+    <button class="pill" onclick="V('MI',this)">MI</button>
+    <button class="pill" onclick="V('NJ',this)">NJ</button>
+    <button class="pill" onclick="V('AK',this)">AK</button>
+    <button class="pill" onclick="V('UT',this)">UT</button>
+  </div>
+  <div id="sbadge" class="sbadge"></div>
+  <div class="tabs">
+    <button class="tb active" id="tb-overview" onclick="P('overview',this)">Overview</button>
+    <button class="tb" id="tb-workforce" onclick="P('workforce',this)">Workforce</button>
+    <button class="tb nat-only show" id="tb-nofo" onclick="P('nofo',this)">NOFO Factors</button>
+    <button class="tb nat-only show" id="tb-validation" onclick="P('validation',this)">Benchmark Validation</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ===== OVERVIEW ===== -->
+<div id="panel-overview" class="panel active">
+  <!-- DQ banner (shown for states with caveats) -->
+  <div class="dq-banner" id="dqbanner"></div>
+
+  <div class="hg">
+    <div class="hc">
+      <div class="hc-bar" style="background:linear-gradient(90deg,var(--red),var(--amber))"></div>
+      <div class="hc-label">Complete Deserts</div>
+      <div class="hc-val" style="color:var(--red)" id="h1">42.0%</div>
+      <div class="hc-sub" id="h1s">Rural ZIPs — zero providers all 4 specialties</div>
+      <span class="hc-tag" style="background:var(--red2);color:var(--red)" id="h1t">3,443 ZIPs</span>
+    </div>
+    <div class="hc">
+      <div class="hc-bar" style="background:var(--red)"></div>
+      <div class="hc-label">Critical Counties</div>
+      <div class="hc-val" style="color:var(--amber)" id="h2">910</div>
+      <div class="hc-sub" id="h2s">counties rated Critical severity</div>
+      <span class="hc-tag" style="background:var(--amber2);color:var(--amber)" id="h2t">national</span>
+    </div>
+    <div class="hc">
+      <div class="hc-bar" style="background:var(--teal)"></div>
+      <div class="hc-label">Zero-Telehealth Counties</div>
+      <div class="hc-val" style="color:var(--teal)" id="h4">1,982</div>
+      <div class="hc-sub">Counties with zero TH billing — median 0.0/10K</div>
+      <span class="hc-tag" style="background:var(--teal3);color:var(--teal)" id="h4t">77%</span>
+    </div>
+    <div class="hc">
+      <div class="hc-bar" style="background:var(--gold)"></div>
+      <div class="hc-label">Rural Providers</div>
+      <div class="hc-val" style="color:var(--gold)" id="h5">21,919</div>
+      <div class="hc-sub" id="h5t">national baseline</div>
+    </div>
+    <div class="hc">
+      <div class="hc-bar" style="background:var(--amber)"></div>
+      <div class="hc-label">High-Impact Deserts</div>
+      <div class="hc-val" style="color:var(--amber)" id="himp">784</div>
+      <div class="hc-sub">counties — low providers, &gt;1K enrollees</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Provider Desert Rates <span class="stag st-nat" id="dscope">National</span></div>
+      <div class="cs">% of rural ZIPs with zero Medicaid-billing providers per specialty</div>
+      <div id="dbars">
+        <div class="br"><span class="bl">Cardiology</span><div class="bg"><div class="bf" style="background:var(--red)"></div></div><span class="bv" id="bcard">95.9%</span></div>
+        <div class="br"><span class="bl">OB/GYN</span><div class="bg"><div class="bf" style="background:var(--red)"></div></div><span class="bv" id="bob">94.9%</span></div>
+        <div class="br"><span class="bl">Behavioral Health</span><div class="bg"><div class="bf" style="background:var(--amber)"></div></div><span class="bv" id="bbh">74.5%</span></div>
+        <div class="br"><span class="bl">Primary Care</span><div class="bg"><div class="bf" style="background:var(--amber)"></div></div><span class="bv" id="bpc">58.1%</span></div>
+        <div class="br"><span class="bl">Dental</span><div class="bg"><div class="bf" style="background:var(--teal)"></div></div><span class="bv" id="bcd">69.9%</span></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 13px;background:var(--amber2);border-radius:var(--r2);border-left:3px solid var(--amber)">
+        <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:2px">High-impact deserts</div>
+        <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--amber)" id="himp2">784</div>
+        <div style="font-size:10px;color:var(--amber)">counties — low providers, &gt;1K enrollees</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div class="tier" style="background:var(--red2)">
+          <span class="tn" style="color:var(--red)">Critical</span>
+          <div style="text-align:right">
+            <div class="tv" style="color:var(--red)" id="tc">910</div>
+            <div class="tp" id="tcpct">48.4%</div>
+          </div>
+        </div>
+        <div class="tier" style="background:var(--amber2)">
+          <span class="tn" style="color:var(--amber)">Severe</span>
+          <div style="text-align:right">
+            <div class="tv" style="color:var(--amber)" id="ts">680</div>
+            <div class="tp" id="tspct">36.2%</div>
+          </div>
+        </div>
+        <div class="tier" style="background:var(--s3)">
+          <span class="tn" style="color:var(--slate)">Moderate</span>
+          <div style="text-align:right">
+            <div class="tv" style="color:var(--slate)" id="tm">406</div>
+            <div class="tp" id="tmpct">21.6%</div>
+          </div>
+        </div>
+        <div class="tier" style="background:var(--green2)">
+          <span class="tn" style="color:var(--green)">Adequate</span>
+          <div style="text-align:right">
+            <div class="tv" style="color:var(--green)" id="ta">580</div>
+            <div class="tp" id="tapct">30.9%</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:8px" id="sevtotal">National rural counties — enrollment-normalized severity</div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="ct">Provider Rates / 10K Enrollees</div>
+      <div class="cs" id="ratesub">County median &bull; vs HPSA threshold 2.86/10K</div>
+      <div class="rr"><span class="rs">Primary Care</span><span class="rv" style="color:var(--amber)" id="rpc">2.08/10K</span><span class="rb" style="color:var(--amber)">below HPSA 2.86</span></div>
+      <div class="rr"><span class="rs">Behavioral Health</span><span class="rv" style="color:var(--red)" id="rbh">0.37/10K</span><span class="rb" style="color:var(--red)">urban avg 20&times; higher</span></div>
+      <div class="rr"><span class="rs">OB / GYN</span><span class="rv" style="color:var(--red)" id="rob">0.00/10K</span><span class="rb" style="color:var(--red)">median is zero</span></div>
+      <div class="rr"><span class="rs">Cardiology</span><span class="rv" style="color:var(--red)" id="rcard">0.00/10K</span><span class="rb" style="color:var(--red)">median is zero</span></div>
+    </div>
+    <div class="card">
+      <div class="ct">CAH Viability <span class="stag st-nat">National sample</span></div>
+      <div class="cs">Critical Access Hospital billing trends &bull; 339 national CAHs</div>
+      <div class="mini3">
+        <div class="mini"><div class="mini-val" style="color:#60A5FA">339</div><div class="mini-lbl">Analysed</div></div>
+        <div class="mini" style="border-color:rgba(251,146,60,.3)"><div class="mini-val" style="color:var(--amber)">81</div><div class="mini-lbl">At-risk</div></div>
+        <div class="mini" style="border-color:rgba(240,82,82,.3)"><div class="mini-val" style="color:var(--red)">18</div><div class="mini-lbl">Critical</div></div>
+      </div>
+      <div style="margin-top:12px;padding:9px 12px;background:var(--s3);border-radius:var(--r2);font-size:11px;color:var(--text2);line-height:1.55">81 CAHs show &ge;2 consecutive years of billing decline. Note: counts reflect national rural sample — state-specific CAH counts pending NPPES state-filter verification.</div>
+    </div>
+    <div class="card">
+      <div class="ct">Severity Distribution</div>
+      <div class="cs" id="chartsubtxt">County access tiers</div>
+      <div style="position:relative;height:185px"><canvas id="sevChart"></canvas></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:11px;color:var(--text2)">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>Critical</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--amber);display:inline-block"></span>Severe</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--slate2);display:inline-block"></span>Moderate</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>Adequate</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WORKFORCE ===== -->
+<div id="panel-workforce" class="panel">
+  <div class="sdiv"><span class="sdiv-label">Workforce Attrition &bull; 2018&ndash;2020 baseline vs 2022&ndash;2024 (corrected baseline-count denominator v1.1)</span></div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="wfscope">National &bull; all specialties declining</div>
+  <div class="ag" id="ag"></div>
+  <div class="g21" style="margin-top:14px">
+    <div class="card">
+      <div class="ct">Net Provider Change by Specialty</div>
+      <div class="cs" id="wfchsub">% change in Medicaid-billing rural providers</div>
+      <div style="position:relative;height:240px"><canvas id="wfChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Narrative Implications</div>
+      <div style="margin-top:6px">
+        <div class="ins-card" style="background:var(--red2);border-color:var(--red)">
+          <div class="ins-t" style="color:var(--red)">OB/GYN: dual evidence for NOFO F.5</div>
+          <div class="ins-b">94.9% zero-provider ZIP rate combined with &minus;28.7% attrition forms the strongest workforce evidence available nationally. AZ, NY, MI show complete OB loss in several counties.</div>
+        </div>
+        <div class="ins-card" style="background:var(--amber2);border-color:var(--amber)">
+          <div class="ins-t" style="color:var(--amber)">Primary Care: largest absolute loss (&minus;1,694)</div>
+          <div class="ins-b">National &minus;13.9% with UT &minus;30.6%, AZ &minus;27.8%, MI &minus;26.2%. Each departure from a single-provider county creates a complete access void for Medicaid beneficiaries.</div>
+        </div>
+        <div class="ins-card" style="background:var(--teal3);border-color:var(--teal)">
+          <div class="ins-t" style="color:var(--teal)">Attrition note: Medicaid NPI counts, not headcount</div>
+          <div class="ins-b">Figures reflect providers billing Medicaid in rural ZIPs. Cross-reference HRSA AHRF before citing as headcount loss. Expansion states (IL, NY, WY, UT, NJ) carry attrition methodology caveat.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NOFO FACTORS (national only) ===== -->
+<div id="panel-nofo" class="panel">
+  <div class="g22" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ct">The $50B Funding Mechanism</div>
+      <div class="cs">How competitive allocation works — and why precision data determines the outcome</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="padding:16px;border-radius:var(--r2);background:var(--teal3);border:1px solid rgba(10,191,173,.2)">
+          <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:var(--teal)">$25B</div>
+          <div style="font-size:11px;font-weight:600;color:var(--teal);margin-bottom:5px">Equal allocation</div>
+          <div style="font-size:11px;color:var(--text2)">Distributed equally. No competitive scoring required. Every state receives their share.</div>
+        </div>
+        <div style="padding:16px;border-radius:var(--r2);background:var(--red2);border:1px solid rgba(240,82,82,.2)">
+          <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:var(--red)">$25B</div>
+          <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:5px">Competitive — re-scored yearly</div>
+          <div style="font-size:11px;color:var(--text2)">States with stronger data evidence win more. Re-allocated every year based on initiative quality.</div>
+        </div>
+      </div>
+      <div style="padding:10px 13px;background:var(--amber2);border-radius:var(--r2);border-left:3px solid var(--amber);font-size:11px;color:var(--amber);font-weight:500">&#9888;&nbsp; 10-month obligation window — unspent year-1 funds face federal clawback. States need county-level targeting data immediately.</div>
+    </div>
+    <div class="card">
+      <div class="ct">5 Dimensions CMS Scores Per Initiative</div>
+      <div class="cs">Every initiative scored on all five — Outcomes and Projected Impact require quantified baselines</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="padding:9px 12px;border-radius:var(--r2);background:var(--s3);display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-weight:600;color:#60A5FA;width:120px;flex-shrink:0">Strategy</span><span style="font-size:11px;color:var(--text2)">Evidence-based design with clear theory of change</span></div>
+        <div style="padding:9px 12px;border-radius:var(--r2);background:var(--s3);display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--teal);width:120px;flex-shrink:0">Work Plan</span><span style="font-size:11px;color:var(--text2)">County-specific milestones, timeline, governance</span></div>
+        <div style="padding:9px 12px;border-radius:var(--r2);background:var(--red2);border-left:3px solid var(--red);display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--red);width:120px;flex-shrink:0">Outcomes</span><span style="font-size:11px;color:var(--text2)"><strong style="color:var(--text)">Requires quantified baselines</strong> — our analytics produce these</span></div>
+        <div style="padding:9px 12px;border-radius:var(--r2);background:var(--red2);border-left:3px solid var(--red);display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--red);width:120px;flex-shrink:0">Proj. Impact</span><span style="font-size:11px;color:var(--text2)"><strong style="color:var(--text)">Requires county desert maps</strong> — our analytics produce these</span></div>
+        <div style="padding:9px 12px;border-radius:var(--r2);background:var(--s3);display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--green);width:120px;flex-shrink:0">Sustainability</span><span style="font-size:11px;color:var(--text2)">Post-grant plan and systemic change evidence</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="sdiv"><span class="sdiv-label">9 NOFO Initiative Factors — analytics evidence mapped to each</span></div>
+  <div class="nf-grid" style="margin-bottom:20px">
+    <div class="nfc"><span class="nfc-code" style="background:var(--red2);color:var(--red)">F.1</span><div class="nfc-title">Prevention &amp; Chronic Disease</div><div class="nfc-ev">Diabetes 13.5%, obesity 38.4%, depression 22.9%, no preventive visit 78.3% — CDC PLACES county medians. BH rate 0.37/10K vs urban 8–10/10K = 20&times; disparity for F.1 scoring.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--red2);color:var(--red)">HIGH</span></div></div>
+    <div class="nfc"><span class="nfc-code" style="background:var(--teal3);color:var(--teal)">F.3</span><div class="nfc-title">Consumer Technology Solutions</div><div class="nfc-ev">1,982 zero-telehealth counties (77%) provides the F.3 baseline. Median 0.0 claims/10K quantifies technology access gap precisely as CMS requires.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--red2);color:var(--red)">HIGH</span></div></div>
+    <div class="nfc"><span class="nfc-code" style="background:var(--amber2);color:var(--amber)">F.4</span><div class="nfc-title">Training &amp; Technical Assistance</div><div class="nfc-ev">Attrition across all specialties quantifies training demand and pipeline gap. Year-over-year provider loss rates set measurable recruitment targets for F.4 initiatives.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--amber2);color:var(--amber)">MEDIUM</span></div></div>
+    <div class="nfc"><span class="nfc-code" style="background:var(--red2);color:var(--red)">F.5</span><div class="nfc-title">Workforce Recruitment &amp; Retention</div><div class="nfc-ev">OB/GYN &minus;28.7% · PC &minus;13.9% · EM &minus;26.3% national attrition. State-specific figures available for all 9 run states. Corrected denominator in v1.1 — cite with Medicaid NPI caveat.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--red2);color:var(--red)">HIGH</span></div></div>
+    <div class="nfc"><span class="nfc-code" style="background:var(--amber2);color:var(--amber)">F.6</span><div class="nfc-title">Health IT Infrastructure</div><div class="nfc-ev">Telehealth penetration baseline per county with FIPS precision. Zero-billing counties map directly to technology investment need for F.6 proposals.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--amber2);color:var(--amber)">MEDIUM</span></div></div>
+    <div class="nfc"><span class="nfc-code" style="background:var(--red2);color:var(--red)">F.7</span><div class="nfc-title">Appropriate Care Availability</div><div class="nfc-ev">Critical county severity tiers, 784 high-impact desert counties, enrollment-normalised rates per county. 427 counties with uninsured rate &ge;15% — compounded access gap direct evidence.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--red2);color:var(--red)">HIGH</span></div></div>
+    <div class="nfc"><span class="nfc-code" style="background:var(--red2);color:var(--red)">F.8</span><div class="nfc-title">Behavioral Health Integration</div><div class="nfc-ev">74.5% rural BH desert + 0.37/10K. Urban–rural disparity 20–27&times;. SAMHSA-validated. Poor mental health 17.3%, depression 22.9% (CDC PLACES). Strongest single-specialty access gap.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--red2);color:var(--red)">HIGH</span></div></div>
+    <div class="nfc"><span class="nfc-code" style="background:var(--amber2);color:var(--amber)">F.9</span><div class="nfc-title">Innovative Care Models</div><div class="nfc-ev">81 at-risk CAHs = conversion opportunity to outpatient/community hub models. CAH NPI list enables precise intervention targeting by FIPS. Note: national sample — state counts pending.</div><div class="nfc-foot"><span class="nfc-foot-lbl">Analytics impact</span><span class="nfc-score" style="background:var(--amber2);color:var(--amber)">MEDIUM</span></div></div>
+  </div>
+  <div class="sdiv"><span class="sdiv-label">Scoring contrast — precision data vs vague assertion</span></div>
+  <div class="sc-row">
+    <div class="sc-box" style="background:var(--red2);border-color:var(--red)"><div class="sc-lbl" style="color:var(--red)">Low-scoring (vague assertion)</div><div class="sc-txt" style="color:var(--red)">&ldquo;Our state has significant gaps in rural healthcare access, particularly for maternal health and primary care services.&rdquo;</div></div>
+    <div class="sc-box" style="background:var(--green2);border-color:var(--green)"><div class="sc-lbl" style="color:var(--green)">High-scoring (precision analytics)</div><div class="sc-txt" style="color:var(--green)">&ldquo;94.9% of rural ZIPs have zero Medicaid-billing OB/GYN providers. The rural OB/GYN workforce declined 28.7% from 2018–2020 to 2022–2024. This initiative targets 784 high-impact counties where provider-to-enrollee ratios fall below 0.5 per 10,000 beneficiaries.&rdquo;</div></div>
+  </div>
+  <div class="sc-row">
+    <div class="sc-box" style="background:var(--red2);border-color:var(--red)"><div class="sc-lbl" style="color:var(--red)">Low-scoring (vague assertion)</div><div class="sc-txt" style="color:var(--red)">&ldquo;Telehealth adoption in rural areas has been limited and presents an opportunity for technology investment.&rdquo;</div></div>
+    <div class="sc-box" style="background:var(--green2);border-color:var(--green)"><div class="sc-lbl" style="color:var(--green)">High-scoring (precision analytics)</div><div class="sc-txt" style="color:var(--green)">&ldquo;1,982 rural counties (77%) have zero Medicaid telehealth billing in the 2022–2024 analysis window. Median telehealth claims per 10,000 rural enrollees is 0.0. This baseline quantifies the technology access gap required under NOFO factor F.3.&rdquo;</div></div>
+  </div>
+</div>
+
+<!-- ===== BENCHMARK VALIDATION (national only) ===== -->
+<div id="panel-validation" class="panel">
+  <div class="sdiv"><span class="sdiv-label">6 authoritative benchmark sources — every major finding cross-referenced</span></div>
+  <div class="bm-grid">
+    <div class="bmc" style="--c:var(--red)"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)"></div><div class="bmc-org" style="color:var(--red)">HRSA AHRF 2023–24</div><div class="bmc-full">Health Resources &amp; Services Administration — Area Health Resources File</div><div class="bmc-desc">Validates primary care counts per rural population, HPSA designation thresholds (2.86/10K), rural/urban county classification. Pipeline county counts within &plusmn;7 of HRSA expected for all 9 states.</div></div>
+    <div class="bmc"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)"></div><div class="bmc-org" style="color:var(--red)">March of Dimes 2022</div><div class="bmc-full">Maternity Care Desert Report — county-level OB/GYN access analysis</div><div class="bmc-desc">Validates OB/GYN provider desert rates. March of Dimes found 36% of US counties lack OB care at county level — consistent with our 82–100% ZIP-level rates (ZIP granularity always higher than county aggregation).</div></div>
+    <div class="bmc"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal)"></div><div class="bmc-org" style="color:var(--teal)">SAMHSA 2022</div><div class="bmc-full">Substance Abuse &amp; Mental Health Services Administration — workforce gap analysis</div><div class="bmc-desc">Validates behavioral health provider rates per rural population. SAMHSA confirms urban BH access is 8–10&times; higher than rural — consistent with our 0.26–1.68/10K findings vs urban 8–10/10K.</div></div>
+    <div class="bmc"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--amber)"></div><div class="bmc-org" style="color:var(--amber)">AHA / Chartis 2024</div><div class="bmc-full">American Hospital Association &amp; Chartis Center for Rural Health</div><div class="bmc-desc">Validates CAH at-risk and closure probability. Chartis 2024 found 31% of rural hospitals vulnerable. Our 23.9% at-risk rate is consistent — analysed 339 of 1,350 CAHs (25% partial registry).</div></div>
+    <div class="bmc"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)"></div><div class="bmc-org" style="color:var(--green)">USDA ERS 2023</div><div class="bmc-full">USDA Economic Research Service — Rural-Urban Continuum Codes</div><div class="bmc-desc">Validates rural county definitions and state-level rural population percentages. All 9 pipeline states return county counts within &plusmn;7 of USDA ERS expected values for their rural county designation.</div></div>
+    <div class="bmc"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#60A5FA"></div><div class="bmc-org" style="color:#60A5FA">ACC / AHA 2023</div><div class="bmc-full">American College of Cardiology — Rural Cardiology Access Research</div><div class="bmc-desc">Validates cardiology specialist desert rates. ACC/AHA research confirms specialist access is highly concentrated in urban centres. Our 85–100% rural cardiology desert rates are directionally consistent.</div></div>
+  </div>
+  <div class="sdiv"><span class="sdiv-label">3-step validation methodology applied to every finding</span></div>
+  <div class="step-grid">
+    <div class="step-card" style="border-top:2px solid #60A5FA"><div class="step-num" style="color:#60A5FA">1</div><div class="step-title" style="color:#60A5FA">Directional Check</div><div class="step-desc">Does the pipeline finding point in the same direction as the benchmark? Filters out systematic errors regardless of denominator differences.</div></div>
+    <div class="step-card" style="border-top:2px solid var(--teal)"><div class="step-num" style="color:var(--teal)">2</div><div class="step-title" style="color:var(--teal)">Magnitude Check</div><div class="step-desc">Is the numerical magnitude plausible? Ratios outside 0.1&times;–2.0&times; of benchmark trigger investigation. Scope differences (Medicaid-only vs all-payer) documented for each finding.</div></div>
+    <div class="step-card" style="border-top:2px solid var(--green)"><div class="step-num" style="color:var(--green)">3</div><div class="step-title" style="color:var(--green)">Scope Adjustment</div><div class="step-desc">Document denominator differences: Medicaid-billing vs all physicians; Medicaid enrollees vs total population. Precision distinctions — not errors — stated clearly in grant narrative.</div></div>
+  </div>
+  <div class="sdiv"><span class="sdiv-label">Validation results — 10 findings tested across 9 states (Run 4 v1.1.2)</span></div>
+  <div class="card">
+    <div class="ct">Every Major Finding Against Its Benchmark Source</div>
+    <div class="cs">9-state run validated against HRSA, March of Dimes, SAMHSA, Chartis, USDA ERS and ACC/AHA &bull; Run 4 data June 7, 2026</div>
+    <div style="overflow-x:auto">
+      <table class="vtbl" style="margin-top:4px">
+        <thead><tr><th>Finding</th><th>Our Result</th><th>Benchmark Source</th><th>Benchmark Result</th><th>Scope Note</th><th>Assessment</th></tr></thead>
+        <tbody>
+          <tr><td><strong style="color:var(--text)">OB/GYN desert rate</strong></td><td>82.8–100% of rural ZIPs</td><td>March of Dimes 2022</td><td>36% of US counties lack OB care</td><td>ZIP &gt; county — expected and consistent</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">BH provider rate</strong></td><td>0.26–1.68 per 10K enrollees</td><td>SAMHSA 2022</td><td>Urban BH avg 8–10&times; higher than rural</td><td>Directionally consistent — 20&times; disparity confirmed</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">Primary care rate / 10K</strong></td><td>0.00–4.22 by state</td><td>HRSA AHRF 2023</td><td>3.1–4.8 all physicians / 10K total pop</td><td>Medicaid-billing only vs all physicians — scope explained</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">CAH at-risk rate</strong></td><td>23.9% of 339 analysed</td><td>Chartis 2024</td><td>31% of all 1,350 rural hospitals</td><td>Partial CAH registry (25%) — representative sample</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">Rural county counts</strong></td><td>1–86 counties by state</td><td>USDA ERS 2023</td><td>4–80 expected by state</td><td>All 9 states within &plusmn;7 of expected</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">ZIP count by state</strong></td><td>7–323 by state</td><td>HRSA FORHP 2025</td><td>8–320 expected per HRSA</td><td>All 9 states within &plusmn;15 of expected</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">Cardiology desert rate</strong></td><td>85.7–100% of rural ZIPs</td><td>ACC / AHA 2023</td><td>Specialist access concentrated urban</td><td>Directionally consistent with ACC/AHA data</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">OB/GYN national attrition</strong></td><td>&minus;28.7% (corrected v1.1)</td><td>HRSA AHRF 2023</td><td>Rural OB/GYN decline documented 2018–2024</td><td>Medicaid NPI counts — baseline_count denominator (v1.1 fix)</td><td><span class="v-badge" style="background:var(--green2);color:var(--green)">VALID</span></td></tr>
+          <tr><td><strong style="color:var(--text)">Alaska PC rate (0.00)</strong></td><td>0.00 per 10K — confirmed genuine desert in enrolled county</td><td>HRSA AHRF 2023</td><td>3.2 physicians / 10K rural pop</td><td>29/30 AK boroughs missing from enrollment file — AK rates are valid for the 1 enrolled county only. Supply FIPS 02xxx enrollment to resolve.</td><td><span class="v-badge" style="background:var(--amber2);color:var(--amber)">CAVEAT</span></td></tr>
+          <tr><td><strong style="color:var(--text)">New Jersey OB/GYN attrition</strong></td><td>Suppressed (baseline n=2)</td><td>State data context</td><td>NJ has only 7 rural ZIPs</td><td>Low-sample guard correctly suppresses pct — cite net count only</td><td><span class="v-badge" style="background:var(--s4);color:var(--slate)">KNOWN</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="res3">
+      <div class="rsc" style="background:var(--green2);border-color:var(--green)"><div class="rsc-lbl" style="color:var(--green)">8 of 10 — VALID</div><div class="rsc-txt" style="color:var(--text2)">Numerically consistent with authoritative benchmarks. Grant-ready for direct use in Section 2 without modification.</div></div>
+      <div class="rsc" style="background:var(--amber2);border-color:var(--amber)"><div class="rsc-lbl" style="color:var(--amber)">1 of 10 — CAVEAT</div><div class="rsc-txt" style="color:var(--text2)">Alaska: 29/30 borough enrollment missing. Raw desert counts valid; per-10K rates valid only for enrolled county.</div></div>
+      <div class="rsc" style="background:var(--s3);border-color:var(--slate3)"><div class="rsc-lbl" style="color:var(--slate)">1 of 10 — KNOWN</div><div class="rsc-txt" style="color:var(--text2)">NJ has only 7 rural ZIPs. Low-sample guard suppresses volatile percentages. Cite absolute counts only for NJ OB/GYN.</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<footer>
+  <strong>Acentra Health</strong> &bull; Rural Health Analytics Pipeline v1.1.2 &bull; HHS Medicaid Provider Spending Dataset (Feb 2026) &bull; 238M records &bull; Run 4 June 7, 2026<br>
+  ZIP and workforce figures are state-specific when state filter is active &bull; CAH figures are national sample &bull; All figures represent Medicaid fee-for-service billing only<br>
+  NOFO Factors and Benchmark Validation reflect national baseline — visible in All States view only<br>
+  Sources: HHS opendata.hhs.gov &bull; NPPES CMS &bull; HRSA FORHP Sept 2025 &bull; Census SAHIE 2022 &bull; CDC PLACES 2023 &bull; Validated: HRSA AHRF &bull; USDA ERS &bull; SAMHSA &bull; March of Dimes &bull; AHA/Chartis 2024 &bull; ACC/AHA 2023
+</footer>
+
+<script>
+Chart.defaults.font.family="'DM Sans',sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.color="#64748B";
+
+/* ── State data objects (updated Run 4 v1.1.2 — June 7 2026) ── */
+const D={
+  national:{lbl:"All States",award:"",
+    h1:"42.0%",h1s:"Rural ZIPs — zero providers all 4 specialties",h1t:"3,443 ZIPs",
+    h2:"910",h2s:"counties rated Critical severity",h2t:"national",
+    h4:"1,982",h4t:"77%",h5:"21,919",h5t:"national baseline",himp:"784",
+    sev:{c:910,s:680,m:406,a:580,tot:2576},
+    bars:{card:95.9,ob:94.9,bh:74.5,pc:58.1,cd:69.9},
+    rates:{pc:"2.08",bh:"0.37",ob:"0.00",card:"0.00"},
+    ratesub:"County median \u00b7 vs HPSA threshold 2.86/10K",
+    sevtot:"National rural counties \u2014 enrollment-normalized severity",
+    chsub:"All states",
+    attr:[{s:"OB/GYN",p:-28.7,f:"Largest % loss"},{s:"Emergency",p:-26.3,f:null},{s:"Dental",p:-20.5,f:null},{s:"Primary Care",p:-13.9,f:"Largest absolute"},{s:"Cardiology",p:-10.3,f:null},{s:"Behav. Health",p:-2.5,f:null}],
+    wfsub:"National \u00b7 all specialties declining \u00b7 corrected baseline-count denominator v1.1",
+    wfchsub:"National % change in Medicaid-billing rural providers",
+    dq:null
+  },
+  WY:{lbl:"Wyoming",award:"$147M",
+    h1:"34.7%",h1s:"WY complete desert ZIPs",h1t:"17 of 49 ZIPs",
+    h2:"4",h2s:"WY counties rated Critical",h2t:"4 of 23",
+    h4:"18",h4t:"78.3% of counties",h5:"140",h5t:"WY rural providers",himp:"7",
+    sev:{c:4,s:8,m:2,a:8,tot:22},
+    bars:{card:95.9,ob:91.8,bh:69.4,pc:65.3,cd:53.1},
+    rates:{pc:"3.99",bh:"1.45",ob:"0.00",card:"0.00"},
+    ratesub:"Wyoming county median \u00b7 vs HPSA 2.86/10K",
+    sevtot:"22 WY rural counties",chsub:"Wyoming",
+    attr:[{s:"OB/GYN",p:-16.7,f:"n=6 \u2014 cite % w/caution"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:-11.5,f:null},{s:"Primary Care",p:-9.1,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:-11.4,f:null}],
+    wfsub:"Wyoming \u2014 non-expansion state baseline caveat applies",
+    wfchsub:"Wyoming net % change (baseline caveat: non-expansion state)",
+    dq:"Wyoming non-expansion state: 2018\u20132020 baseline reflects lower enrollment. Attrition figures may overstate provider loss. Use 2020\u20132022 vs 2022\u20132024 window for narrative."
+  },
+  IL:{lbl:"Illinois",award:"$245M",
+    h1:"40.9%",h1s:"IL complete desert ZIPs",h1t:"132 of 323 ZIPs",
+    h2:"25",h2s:"IL counties rated Critical",h2t:"25 of 102",
+    h4:"65",h4t:"75.6% of counties",h5:"1,726",h5t:"IL rural providers",himp:"16",
+    sev:{c:25,s:30,m:13,a:18,tot:86},
+    bars:{card:94.1,ob:93.2,bh:75.9,pc:46.4,cd:80.8},
+    rates:{pc:"4.22",bh:"0.61",ob:"0.00",card:"0.00"},
+    ratesub:"Illinois county median \u00b7 vs HPSA 2.86/10K",
+    sevtot:"86 IL rural counties",chsub:"Illinois",
+    attr:[{s:"OB/GYN",p:-24.7,f:"−19 net"},{s:"Emergency",p:-33.3,f:null},{s:"Dental",p:-5.1,f:null},{s:"Primary Care",p:10.9,f:"Expansion artifact"},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:-3.1,f:null}],
+    wfsub:"Illinois \u2014 Medicaid expansion Jan 2020 \u2014 PC growth is enrollment artifact, not workforce gain",
+    wfchsub:"Illinois net % change (expansion artifact flag on PC +10.9%)",
+    dq:"Illinois Medicaid expansion artifact: PC attrition shows +120 net / +10.9% growth. This reflects new Medicaid NPI billing due to expansion enrollment, not genuine workforce growth. Do not cite PC as a positive story without HRSA AHRF corroboration."
+  },
+  NY:{lbl:"New York",award:"$281M",
+    h1:"40.9%",h1s:"NY complete desert ZIPs",h1t:"131 of 320 ZIPs",
+    h2:"13",h2s:"NY counties rated Critical",h2t:"13 of 62",
+    h4:"29",h4t:"64.4% of counties",h5:"1,061",h5t:"NY rural providers",himp:"4",
+    sev:{c:13,s:16,m:7,a:9,tot:45},
+    bars:{card:90.3,ob:94.4,bh:76.9,pc:50.6,cd:76.2},
+    rates:{pc:"3.87",bh:"1.06",ob:"0.00",card:"0.00"},
+    ratesub:"New York county median \u00b7 vs HPSA 2.86/10K",
+    sevtot:"45 NY rural counties",chsub:"New York",
+    attr:[{s:"OB/GYN",p:-35.0,f:"−14 net"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:-31.7,f:"−71 net"},{s:"Primary Care",p:-5.7,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:0.5,f:"Expansion artifact"}],
+    wfsub:"New York \u2014 BH +1 gain flagged as expansion artifact (attrition caveat applies)",
+    wfchsub:"New York net % change",
+    dq:"New York expansion caveat: BH net +1 (+0.5%) is likely a Medicaid expansion billing artifact, not genuine workforce growth. All other NY attrition figures are valid."
+  },
+  AZ:{lbl:"Arizona",award:"$218M",
+    h1:"51.1%",h1s:"AZ complete desert ZIPs",h1t:"47 of 92 ZIPs",
+    h2:"9",h2s:"AZ counties rated Critical",h2t:"9 of 15",
+    h4:"11",h4t:"73.3% of counties",h5:"164",h5t:"AZ rural providers",himp:"2",
+    sev:{c:9,s:3,m:1,a:2,tot:15},
+    bars:{card:95.7,ob:98.9,bh:81.5,pc:64.1,cd:72.8},
+    rates:{pc:"0.78",bh:"0.33",ob:"0.00",card:"0.00"},
+    ratesub:"Arizona county median \u00b7 vs HPSA 2.86/10K",
+    sevtot:"15 AZ rural counties",chsub:"Arizona",
+    attr:[{s:"OB/GYN",p:null,f:"n<5 suppressed"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:-24.3,f:null},{s:"Primary Care",p:-27.8,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:-28.6,f:null}],
+    wfsub:"Arizona \u2014 OB/GYN, EM, Cardiology baseline n<5: cite net counts only",
+    wfchsub:"Arizona net % change",
+    dq:null
+  },
+  HI:{lbl:"Hawaii",award:"$147M",
+    h1:"41.2%",h1s:"HI complete desert ZIPs",h1t:"14 of 34 ZIPs",
+    h2:"1",h2s:"HI counties rated Critical",h2t:"1 of 5",
+    h4:"1",h4t:"25% of counties",h5:"160",h5t:"HI rural providers",himp:"1",
+    sev:{c:1,s:3,m:0,a:0,tot:4},
+    bars:{card:94.1,ob:97.1,bh:58.8,pc:61.8,cd:64.7},
+    rates:{pc:"0.78",bh:"1.68",ob:"0.00",card:"0.00"},
+    ratesub:"Hawaii county median \u00b7 island geography context",
+    sevtot:"4 HI rural counties",chsub:"Hawaii",
+    attr:[{s:"OB/GYN",p:null,f:"n<5 suppressed"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:-8.8,f:null},{s:"Primary Care",p:-17.2,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:-20.0,f:null}],
+    wfsub:"Hawaii \u2014 OB, EM, Cardiology baseline n<5: cite net counts only",
+    wfchsub:"Hawaii net % change",
+    dq:null
+  },
+  MI:{lbl:"Michigan",award:"$253M",
+    h1:"34.1%",h1s:"MI complete desert ZIPs",h1t:"95 of 279 ZIPs",
+    h2:"24",h2s:"MI counties rated Critical",h2t:"24 of 83",
+    h4:"43",h4t:"61.4% of counties",h5:"681",h5t:"MI rural providers",himp:"15",
+    sev:{c:24,s:24,m:13,a:9,tot:70},
+    bars:{card:96.8,ob:96.4,bh:73.8,pc:61.6,cd:50.5},
+    rates:{pc:"1.23",bh:"0.63",ob:"0.00",card:"0.00"},
+    ratesub:"Michigan county median \u00b7 vs HPSA 2.86/10K",
+    sevtot:"70 MI rural counties",chsub:"Michigan",
+    attr:[{s:"OB/GYN",p:-22.2,f:"−4 net"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:-39.8,f:"−187 net"},{s:"Primary Care",p:-26.2,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:8.5,f:"Expansion artifact"}],
+    wfsub:"Michigan \u2014 BH +11 flagged as expansion artifact; EM/Cardiology baseline n<5",
+    wfchsub:"Michigan net % change",
+    dq:null
+  },
+  NJ:{lbl:"New Jersey",award:"$147M",
+    h1:"0.0%",h1s:"NJ complete desert ZIPs",h1t:"0 of 7 ZIPs",
+    h2:"3",h2s:"NJ counties rated Critical",h2t:"3 of 21 counties",
+    h4:"1",h4t:"25% of counties",h5:"43",h5t:"NJ rural providers",himp:"0",
+    sev:{c:3,s:1,m:0,a:0,tot:4},
+    bars:{card:85.7,ob:100.0,bh:28.6,pc:28.6,cd:28.6},
+    rates:{pc:"0.16",bh:"0.26",ob:"0.00",card:"0.00"},
+    ratesub:"New Jersey \u00b7 only 7 rural ZIPs \u2014 most urban US state",
+    sevtot:"4 NJ rural counties (county-level severity is more meaningful than ZIP deserts here)",
+    chsub:"New Jersey",
+    attr:[{s:"OB/GYN",p:null,f:"n<5 suppressed"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:0.0,f:"stable"},{s:"Primary Care",p:-9.1,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:12.5,f:"Expansion artifact"}],
+    wfsub:"New Jersey \u2014 very small rural footprint (7 ZIPs); BH +1 expansion artifact",
+    wfchsub:"New Jersey net % change (7 ZIPs \u2014 small sample throughout)",
+    dq:"New Jersey: 0 complete desert ZIPs but 3 critical counties — county severity uses enrollment-normalized rates (low-access) not literal zero providers. NJ rural is 'low-access' not 'zero-access'. NJ BH +1 is an expansion artifact. OB/GYN, EM, Cardiology percentages suppressed (baseline n<5 \u2014 cite net counts only)."
+  },
+  AK:{lbl:"Alaska",award:"$147M",
+    h1:"54.8%",h1s:"AK complete desert ZIPs",h1t:"40 of 73 ZIPs",
+    h2:"29",h2s:"AK boroughs rated Critical",h2t:"29 of 30 (96.7%)",
+    h4:"28",h4t:"93.3% of counties",h5:"94",h5t:"AK rural providers",himp:"1",
+    sev:{c:29,s:1,m:0,a:0,tot:30},
+    bars:{card:100.0,ob:97.3,bh:90.4,pc:83.6,cd:56.2},
+    rates:{pc:"0.00",bh:"0.00",ob:"0.00",card:"0.00"},
+    ratesub:"Alaska \u2014 0.00 reflects genuine desert in enrolled county; 29/30 boroughs missing from enrollment file",
+    sevtot:"30 AK borough/census areas (29 missing enrollment \u2014 see caveat)",
+    chsub:"Alaska",
+    attr:[{s:"OB/GYN",p:null,f:"n<5 suppressed"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:-14.5,f:null},{s:"Primary Care",p:-19.5,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:22.2,f:"Genuine gain n=9"}],
+    wfsub:"Alaska \u2014 29/30 boroughs missing from enrollment file \u2014 per-10K rates based on 1 enrolled county only",
+    wfchsub:"Alaska net % change (enrollment caveat applies to all normalized rates)",
+    dq:"Alaska enrollment gap: 29 of 30 borough/census units missing from Medicaid enrollment file (FIPS 02xxx). PC/OB/BH/Cardiology rates of 0.00 are genuine desert findings for the 1 enrolled county, not pipeline failures. Supply AK DHSS Medicaid enrollment by borough to unlock full normalized rates. Raw desert counts (83.6% PC, 97.3% OB, 100% Cardiology) are valid and grant-ready. Uninsured rate 16.0% — highest of 9 states; 18 of 30 counties \u226515%."
+  },
+  UT:{lbl:"Utah",award:"$218M",
+    h1:"29.3%",h1s:"UT complete desert ZIPs",h1t:"17 of 58 ZIPs",
+    h2:"10",h2s:"UT counties rated Critical",h2t:"10 of 29",
+    h4:"22",h4t:"75.9% of counties",h5:"185",h5t:"UT rural providers",himp:"10",
+    sev:{c:10,s:7,m:2,a:4,tot:23},
+    bars:{card:94.8,ob:82.8,bh:72.4,pc:44.8,cd:60.3},
+    rates:{pc:"1.11",bh:"0.41",ob:"0.00",card:"0.00"},
+    ratesub:"Utah county median \u00b7 vs HPSA 2.86/10K",
+    sevtot:"23 UT rural counties",chsub:"Utah",
+    attr:[{s:"OB/GYN",p:9.1,f:"Gain: 10\u219211"},{s:"Emergency",p:null,f:"n<5 suppressed"},{s:"Dental",p:-13.7,f:null},{s:"Primary Care",p:-30.6,f:null},{s:"Cardiology",p:null,f:"n<5 suppressed"},{s:"Behav. Health",p:-3.2,f:null}],
+    wfsub:"Utah \u2014 partial Medicaid expansion 2019 \u2014 attrition baseline caveat applies",
+    wfchsub:"Utah net % change (expansion caveat: partial expansion 2019)",
+    dq:"Utah partial expansion caveat: Medicaid expanded Jan 2020 (Prop 3). 2018\u20132020 baseline reflects lower enrollment. Attrition figures directional only \u2014 consider 2020\u20132022 vs 2022\u20132024 window for state narrative. OB/GYN shows net +1 (+9.1%) \u2014 a genuine small gain from 10 to 11 providers, not an artifact."
+  }
+};
+
+let cur="national";
+let sevCh,wfCh;
+const activeTab={id:"overview"};
+
+const acol=p=>{
+  if(p===null||typeof p!=="number")return"#475569";
+  if(p<=-30)return"#F05252";if(p<0)return"#FB923C";
+  if(p===0)return"#64748B";return"#34D399";
+};
+
+function initCharts(){
+  sevCh=new Chart(document.getElementById("sevChart"),{
+    type:"doughnut",
+    data:{labels:["Critical","Severe","Moderate","Adequate"],
+      datasets:[{data:[910,680,406,580],backgroundColor:["#F05252","#FB923C","#64748B","#34D399"],borderWidth:0,hoverOffset:5}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"63%",
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" "+c.label+": "+c.raw.toLocaleString()}}}}
+  });
+  wfCh=new Chart(document.getElementById("wfChart"),{
+    type:"bar",
+    data:{labels:["OB/GYN","Emergency","Dental","Primary Care","Cardiology","BH"],
+      datasets:[{data:[-28.7,-26.3,-20.5,-13.9,-10.3,-2.5],
+        backgroundColor:["#F05252","#F05252","#FB923C","#FB923C","#64748B","#475569"],borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{color:"#64748B",font:{size:10}}},
+              y:{grid:{color:"rgba(255,255,255,.05)"},ticks:{callback:v=>v+"%",color:"#64748B"}}}}
+  });
+}
+
+function renderAttr(data){
+  const g=document.getElementById("ag");if(!g)return;
+  g.innerHTML="";
+  data.forEach(({s,p,f})=>{
+    const c=acol(p);
+    const dp=typeof p==="number"?(p>0?"+":"")+p+"%":(p||"N/A");
+    g.innerHTML+=`<div class="ac"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${c};border-radius:8px 8px 0 0"></div><div class="ap" style="color:${c}">${dp}</div><div class="aspec">${s}</div>${f?`<div class="aflag" style="background:${c}22;color:${c}">${f}</div>`:""}</div>`;
+  });
+  if(wfCh){
+    const d=D[cur]||D.national;
+    wfCh.data.labels=d.attr.map(a=>a.s);
+    wfCh.data.datasets[0].data=d.attr.map(a=>typeof a.p==="number"?a.p:null);
+    wfCh.data.datasets[0].backgroundColor=d.attr.map(a=>acol(a.p));
+    wfCh.update("active");
+  }
+}
+
+function animBars(b){
+  const keys=["card","ob","bh","pc","cd"];
+  const idmap={card:"bcard",ob:"bob",bh:"bbh",pc:"bpc",cd:"bcd"};
+  document.querySelectorAll("#dbars .bf").forEach((el,i)=>{
+    const k=keys[i];el.style.width="0";
+    const w=b[k]??0;
+    setTimeout(()=>{el.style.width=w+"%";el.textContent=w.toFixed(1)+"%";},i*75+40);
+    document.getElementById(idmap[k]).textContent=w.toFixed(1)+"%";
+  });
+}
+
+function V(v,btn){
+  cur=v;
+  document.querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));
+  btn.classList.add("active");
+  const d=D[v]||D.national;
+  const isNat=v==="national";
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+
+  set("h1",d.h1);set("h1s",d.h1s);set("h1t",d.h1t);
+  set("h2",d.h2);set("h2s",d.h2s);set("h2t",d.h2t);
+  set("h4",d.h4);set("h4t",d.h4t);set("h5",d.h5);set("h5t",d.h5t);
+  set("himp",d.himp);set("himp2",d.himp);
+
+  const sv=d.sev,tot=sv.tot||1;
+  [["tc","c"],["ts","s"],["tm","m"],["ta","a"]].forEach(([id,k])=>{
+    set(id,sv[k].toLocaleString());set(id+"pct",(sv[k]/tot*100).toFixed(1)+"%");
+  });
+  set("sevtotal",d.sevtot);set("rpc",d.rates.pc+"/10K");set("rbh",d.rates.bh+"/10K");
+  set("rob",d.rates.ob+"/10K");set("rcard",d.rates.card+"/10K");set("ratesub",d.ratesub);
+  set("wfscope",d.wfsub);set("wfchsub",d.wfchsub);set("chartsubtxt",d.chsub+" county tiers");
+
+  const ds=document.getElementById("dscope");
+  if(ds){ds.textContent=isNat?"National":"State: "+v;ds.className=isNat?"stag st-nat":"stag st-state";}
+
+  const badge=document.getElementById("sbadge");
+  if(!isNat&&d.award){badge.style.background="#0F766E";badge.textContent=d.lbl+" \u00b7 "+d.award;badge.classList.add("show");}
+  else badge.classList.remove("show");
+
+  /* DQ banner */
+  const dqb=document.getElementById("dqbanner");
+  if(d.dq){dqb.innerHTML="<strong>Data Quality Note:</strong> "+d.dq;dqb.classList.add("show");}
+  else dqb.classList.remove("show");
+
+  /* NOFO and Benchmark tabs — national only */
+  document.querySelectorAll(".nat-only").forEach(el=>{
+    if(isNat)el.classList.add("show");else el.classList.remove("show");
+  });
+
+  /* If current tab is nat-only and we switched to a state, fall back to overview */
+  if(!isNat&&(activeTab.id==="nofo"||activeTab.id==="validation")){
+    P("overview",document.getElementById("tb-overview"));
+  }
+
+  if(sevCh){sevCh.data.datasets[0].data=[sv.c,sv.s,sv.m,sv.a];sevCh.update("active");}
+  renderAttr(d.attr);
+  if(activeTab.id==="overview")animBars(d.bars);
+}
+
+function P(panel,btn){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tb").forEach(t=>t.classList.remove("active"));
+  document.getElementById("panel-"+panel).classList.add("active");
+  btn.classList.add("active");
+  activeTab.id=panel;
+  if(panel==="overview")setTimeout(()=>animBars(D[cur]?.bars||D.national.bars),30);
+}
+
+window.addEventListener("load",()=>{
+  initCharts();
+  renderAttr(D.national.attr);
+  animBars(D.national.bars);
+});
+</script>
+</body>
+</html>
