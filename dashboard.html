@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RHT Rural Health Intelligence</title>
+<title>RHT Rural Health Intelligence Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -260,9 +260,15 @@ const NAT9 = {
   dep:22.9, tooth:15.6, noprv:78.3, uninsured:9.7,
 };
 
-const EXP = {IL:['Primary Care'],NY:['Behavioral Health'],MI:['Behavioral Health'],NJ:['Behavioral Health']};
+const EXP = {
+  // IL removed: expanded Medicaid Jan 2014 — well before baseline window.
+  // IL PC +10.9% is NOT an ACA expansion artifact. Likely reflects COVID
+  // continuous enrollment surge (2020-2023) or post-2020 telehealth policy.
+  // NY/MI/NJ BH: expansion billing uptake continued into analysis window.
+  NY:['Behavioral Health'], MI:['Behavioral Health'], NJ:['Behavioral Health']
+};
 const DQ  = {
-  IL:'IL Primary Care +10.9% is a Medicaid expansion artifact — not real workforce growth.',
+  IL:'IL Primary Care +10.9% shows net billing growth — not an ACA expansion artifact (IL expanded 2014). Likely reflects COVID continuous enrollment surge (2020-2023) or post-2020 telehealth uptake. Treat as directional; verify with HRSA AHRF headcount data.',
   NY:'NY Behavioral Health +0.5% (net +1) is likely an expansion artifact.',
   MI:'MI Behavioral Health +8.5% (net +11) is likely an expansion artifact.',
   NJ:'NJ has only 7 rural ZIPs. BH +12.5% is an expansion artifact.',
@@ -402,10 +408,18 @@ function renderOverview(){
   ).join('');
 
   // Severity tiers
-  const all = isNat ? Object.values(CO).flat() : (CO[curState]||[]);
-  const cnt = {Critical:0,Severe:0,Moderate:0,Adequate:0};
-  all.forEach(c=>cnt[c.sev]=(cnt[c.sev]||0)+1);
-  const tot2 = Object.values(cnt).reduce((a,b)=>a+b,0);
+  // For national: use NAT9 pre-computed values (2,576 counties all 50 states)
+  // For state: count from CO data (9-state run)
+  var cnt, tot2;
+  if (isNat) {
+    cnt  = {Critical:NAT9.critical, Severe:NAT9.severe, Moderate:NAT9.moderate, Adequate:NAT9.adequate};
+    tot2 = NAT9.critical + NAT9.severe + NAT9.moderate + NAT9.adequate;
+  } else {
+    const all = CO[curState] || [];
+    cnt  = {Critical:0,Severe:0,Moderate:0,Adequate:0};
+    all.forEach(c=>{if(cnt[c.sev]!==undefined) cnt[c.sev]++;});
+    tot2 = Object.values(cnt).reduce((a,b)=>a+b,0);
+  }
   document.getElementById('sev-tiers').innerHTML =
     [['Critical','var(--red)'],['Severe','var(--amber)'],['Moderate','var(--slate)'],['Adequate','var(--green)']].map(([l,c])=>
       `<div class="sv"><span class="sv-l" style="color:${c}">${l}</span><div class="sv-bar-w"><div class="sv-bar" style="width:${tot2?Math.round(cnt[l]/tot2*100):0}%;background:${c}"></div></div><span class="sv-n" style="color:${c}">${cnt[l]}</span><span style="font-size:10px;color:var(--text3);min-width:30px;text-align:right">${tot2?Math.round(cnt[l]/tot2*100):0}%</span></div>`
