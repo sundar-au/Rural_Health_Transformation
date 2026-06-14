@@ -1,4 +1,4 @@
-# Acentra RHT Rural Health Intelligence Platform
+# RHT Rural Health Intelligence Platform
 
 County-level Medicaid access analytics for the $50B Rural Health Transformation grant program.
 
